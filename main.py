@@ -21,6 +21,14 @@ def main() -> None:
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as fh:
         fh.write(ENTRY + "\n")
+    # Post-write gate: verify the exact line on disk is 1-120 chars,
+    # so a write bug (truncation, extra text) fails loudly here.
+    with open(OUTPUT_FILE, encoding="utf-8") as fh:
+        written = fh.read().rstrip("\n")
+    assert written == ENTRY, "entry.txt content differs from ENTRY"
+    assert 1 <= len(written) <= 120, (
+        f"entry.txt line is {len(written)} chars, outside the 1-120 gate"
+    )
     print(f"Wrote entry ({len(ENTRY)} chars) to {OUTPUT_FILE}")
     # Echo the line itself so the run log shows exactly what was submitted.
     print(ENTRY)
